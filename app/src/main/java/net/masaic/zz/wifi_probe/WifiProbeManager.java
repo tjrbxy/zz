@@ -13,45 +13,35 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-/**
- * Created by Administrator on 2017/3/8 0008.
- */
 
 public class WifiProbeManager {
 
+    private static final String TAG = "WifiProbeManager-app";
     /**
      * 被扫描的所有ip地址
      */
     private List<String> mScanList = new ArrayList<>();
     private String mLocalIp = "";
-
     private MacListListener mListener;
 
     public WifiProbeManager() {
-
         addAllLocalIp();
-
     }
 
     /**
      * 把本地的ip 如 192.168.4.22 后面 192.168.4.1 - 255 所有的IP进行扫描 添加到集合中
      */
     private void addAllLocalIp() {
-
         if (mLocalIp.equals(getLocalIp())) return;
-
         mLocalIp = getLocalIp();
-
         Log.d("wifi-ip", "WifiProbeManager: " + mLocalIp);
         if (TextUtils.isEmpty(mLocalIp))
             return;
-
         mScanList.clear();
         String netIp = mLocalIp.substring(0, mLocalIp.lastIndexOf(".") + 1);
         for (int i = 1; i < Constant.COUNT; i++) {
             mScanList.add(netIp + i);
         }
-
         mScanList.remove(mLocalIp);
     }
 
@@ -61,15 +51,10 @@ public class WifiProbeManager {
      * @param listener
      */
     public void startScan(MacListListener listener) {
-
         addAllLocalIp();//每次进来前 先确定一下wifi的地址
-
         sendQueryPacket(); // 发包
-
         mListener = listener;
         mListener.macList(getConnectedHotMac());
-
-
     }
 
     /**

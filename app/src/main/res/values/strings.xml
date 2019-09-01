@@ -1,3 +1,12 @@
 <resources>
     <string name="app_name">找找摄像头</string>
+    <string name="waring">本软件为免费版，仅能检测和您手机连接在同一
+WIFI网络的针孔摄像头及其他设备。在您房间内但连在其它WIFI的针孔摄像头是检测不到的！检测结果仅供参考，
+对因此产生的不良后果我们不承担任何责任。</string>
+    <string name="proposal">若您担心自己或者妻女的隐私安全，请购买商业版！
+商业版可以高效检测您周边的任何已通电的联网针
+孔摄像头，检出率99.99%并且能定位具体安装位置。
+售价为599元一套，使用权终身。微信搜索小程序“
+找找摄像头”即可购买和检测。</string>
+    <string name="contact">代理或商务合作请联系邮箱86405990@qq.com</string>
 </resources>

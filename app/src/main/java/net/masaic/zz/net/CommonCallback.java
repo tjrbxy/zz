@@ -33,6 +33,7 @@ public abstract class CommonCallback<T> extends StringCallback {
 
     @Override
     public void onError(Call call, Exception e, int id) {
+        Log.d(TAG, "onError: call" + call.toString() + ",e:" + e + ",id:" + id);
         onError(e);
     }
 
