@@ -7,3 +7,4 @@
 /captures
 .externalNativeBuild
 gradle/
+app/src/main/java/net/masaic/zz/activity/LocationActivity.java
