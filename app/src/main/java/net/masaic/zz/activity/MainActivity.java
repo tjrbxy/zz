@@ -67,22 +67,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // WIFI
-        mProbe = new WifiProbeManager();
-        mProbe.startScan(new WifiProbeManager.MacListListener() {
-            @Override
-            public void macList(final List<String> macList) {
-                //因为在线程中进行扫描的，所以要切换到主线程
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        mMacList.clear();
-                        mMacList.addAll(macList);
-                        Log.d("macList", "" + mMacList);
-                    }
-                });
-            }
-        });
         // 权限
         rxPermissions.requestEach(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(new Consumer<Permission>() {
@@ -113,6 +97,43 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mAdapter = new MyRecyclerViewAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
+    }
+
+    private void iniMac() {
+        if (!flag) return;
+        // WIFI
+        mProbe = new WifiProbeManager();
+        mProbe.startScan(new WifiProbeManager.MacListListener() {
+            @Override
+            public void macList(final List<String> macList) {
+                mMacList.clear();
+                mMacList.addAll(macList);
+                Log.d(TAG, "macList: " + macList);
+            }
+        });
+        RxTool.delayToDo(3000, new OnSimpleListener() {
+            @Override
+            public void doSomething() {
+                JSONArray jsonArray = new JSONArray(mMacList);
+                Map parmas = new HashMap();
+                parmas.put("lat", lat + "");
+                parmas.put("lng", lng + "");
+                parmas.put("mac", jsonArray.toString());
+                mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
+                    @Override
+                    public void onError(Exception e) {
+                    }
+
+                    @Override
+                    public void onSuccess(List<MacLogs> response, String info) {
+                        Log.d(TAG, "onSuccess: " + response);
+                        mAdapter.setData(response);
+                    }
+                });
+            }
+        });
+
+
     }
 
     /***********************************/
@@ -147,7 +168,7 @@ public class MainActivity extends AppCompatActivity {
                 lat = location.getLatitude();
                 lng = location.getLongitude();
                 // 发送地址
-                sendMac();
+                iniMac();
                 flag = false;
                 Log.d(TAG, "latitude" + lat + "  " + "longitude" + lng);
                 sb = new StringBuilder();
@@ -223,7 +244,7 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case R.id.refresh:
                 flag = true;
-                sendMac();
+                iniMac();
                 T.showToast("成功刷新！");
                 break;
             default:

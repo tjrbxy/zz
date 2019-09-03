@@ -8,3 +8,5 @@
 .externalNativeBuild
 gradle/
 app/src/main/java/net/masaic/zz/activity/LocationActivity.java
+app/release/app-release.apk
+app/release/output.json
