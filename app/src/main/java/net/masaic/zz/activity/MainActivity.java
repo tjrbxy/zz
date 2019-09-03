@@ -8,7 +8,6 @@ import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,14 +16,11 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
-import com.tencent.map.geolocation.TencentLocation;
-import com.tencent.map.geolocation.TencentLocationListener;
-import com.tencent.map.geolocation.TencentLocationManager;
-import com.tencent.map.geolocation.TencentLocationRequest;
+import com.vondear.rxtool.RxTool;
+import com.vondear.rxtool.interfaces.OnSimpleListener;
 
 import net.masaic.zz.R;
 import net.masaic.zz.adapter.MyRecyclerViewAdapter;
@@ -45,7 +41,7 @@ import java.util.Map;
 
 import io.reactivex.functions.Consumer;
 
-public class MainActivity extends AppCompatActivity implements TencentLocationListener {
+public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity-app";
     private RecyclerView mRecyclerView;
@@ -57,14 +53,12 @@ public class MainActivity extends AppCompatActivity implements TencentLocationLi
 
     //wifi探针
     private WifiProbeManager mProbe;
+    private List mMacList = new ArrayList<>();
 
-    // 定位
-    private TencentLocationManager mLocationManager;
+    // 权限
     final RxPermissions rxPermissions = new RxPermissions(this);
 
     // 地址
-    private TextView tvLocation;
-    private TextView tvAddress;
     private Geocoder geocoder;
     private List<Address> addressList;
     private StringBuilder sb;
@@ -73,33 +67,48 @@ public class MainActivity extends AppCompatActivity implements TencentLocationLi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // WIFI
+        mProbe = new WifiProbeManager();
+        mProbe.startScan(new WifiProbeManager.MacListListener() {
+            @Override
+            public void macList(final List<String> macList) {
+                //因为在线程中进行扫描的，所以要切换到主线程
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        mMacList.clear();
+                        mMacList.addAll(macList);
+                        Log.d("macList", "" + mMacList);
+                    }
+                });
+            }
+        });
         // 权限
-        RxPermissions rxPermission = new RxPermissions(this);
-        rxPermission.requestEach(Manifest.permission.ACCESS_FINE_LOCATION)
+        rxPermissions.requestEach(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(new Consumer<Permission>() {
                     @Override
                     public void accept(Permission permission) throws Exception {
                         if (permission.granted) {
                             // 已经同意该权限
-                            initTencentLocationRequest();
                             initData();
                         } else {
                             // 拒绝了该权限
+                            T.showToast("本程序2秒后退出，请允许获取地理位置");
+                            // System.exit(0);
+                            RxTool.delayToDo(2000, new OnSimpleListener() {
+                                @Override
+                                public void doSomething() {
+                                    System.exit(0);
+                                }
+                            });
+
                         }
                     }
                 });
-        //this.requestPermissions();
 
-        // 定位
-        mLocationManager = TencentLocationManager.getInstance(this);
-        /* 保证调整坐标系前已停止定位 */
-        mLocationManager.removeUpdates(null);
-        // 设置 wgs84 坐标系
-        mLocationManager
-                .setCoordinateType(TencentLocationManager.COORDINATE_TYPE_WGS84);
-
-        mProbe = new WifiProbeManager();
+        // 列表
         mRecyclerView = findViewById(R.id.recycler_view);
+        //  RecyclerView
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mAdapter = new MyRecyclerViewAdapter(this);
@@ -116,7 +125,9 @@ public class MainActivity extends AppCompatActivity implements TencentLocationLi
         // minTime（获取经纬度间隔的最小时间 时时刻刻获得传参数0），
         // minDistance（移动的最小间距 时时刻刻传0），LocationListener（监听）)
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) !=
+                PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this,
+                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -177,163 +188,29 @@ public class MainActivity extends AppCompatActivity implements TencentLocationLi
         });
     }
 
-    private void requestPermissions() {
-        RxPermissions rxPermission = new RxPermissions(this);
-        rxPermission
-                .requestEach(Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_CALENDAR,
-                        Manifest.permission.READ_CALL_LOG,
-                        Manifest.permission.READ_CONTACTS,
-                        Manifest.permission.READ_PHONE_STATE,
-                        Manifest.permission.READ_SMS,
-                        Manifest.permission.RECORD_AUDIO,
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.CALL_PHONE,
-                        Manifest.permission.SEND_SMS)
-                .subscribe(new Consumer<Permission>() {
-                    @Override
-                    public void accept(Permission permission) throws Exception {
-                        if (permission.granted) {
-                            // 用户已经同意该权限
-                            Log.d(TAG, permission.name + " is granted.");
-                        } else if (permission.shouldShowRequestPermissionRationale) {
-                            // 用户拒绝了该权限，没有选中『不再询问』（Never ask again）,那么下次再次启动时。还会提示请求权限的对话框
-                            Log.d(TAG, permission.name + " is denied. More info should be provided.");
-                        } else {
-                            // 用户拒绝了该权限，而且选中『不再询问』
-                            Log.d(TAG, permission.name + " is denied.");
-                        }
-                    }
-                });
-    }
-
-    /**
-     * 开启定位监听器
-     */
-    private void initTencentLocationRequest() {
-        TencentLocationRequest request = TencentLocationRequest.create();
-
-        request
-                .setInterval(30000)
-                .setRequestLevel(1)
-                .setAllowCache(true);
-        TencentLocationManager locationManager = TencentLocationManager.getInstance(this);
-        int error = locationManager.requestLocationUpdates(request, this);
-
-        if (error == 0) {
-            Log.d(TAG, "注册位置监听器成功！");
-        } else {
-            Log.d(TAG, "注册位置监听器失败！");
-        }
-    }
-
-    /**
-     * 位置更新时的回调
-     *
-     * @param tencentLocation 新的位置
-     * @param i               错误码
-     * @param s               错误描述
-     */
-    @Override
-    public void onLocationChanged(TencentLocation tencentLocation, int i, String s) {
-        if (TencentLocation.ERROR_OK == i) {
-            // 定位成功
-            if (tencentLocation != null) {
-                String lat = String.valueOf(tencentLocation.getLatitude());
-                String lon = String.valueOf(tencentLocation.getLongitude());
-                Log.d(TAG, lat + "---" + lon);
-                T.showToast(lat + "---" + lon);
-            }
-        } else {
-            // 定位失败
-            T.showToast("定位失败");
-        }
-    }
-
     /***********************************/
-
-
-    // 响应点击"开始"
-    public void startLocation() {
-        // 创建定位请求
-        TencentLocationRequest request = TencentLocationRequest.create();
-        // 修改定位请求参数, 定位周期 3000 ms
-        request.setInterval(3000);
-        // 开始定位
-        mLocationManager.requestLocationUpdates(request, this);
-        updateLocationStatus("开始定位: " + request + ", 坐标系=" + mLocationManager.getCoordinateType());
-    }
-
-    // 响应点击"停止"
-    public void stopLocation() {
-        mLocationManager.removeUpdates(this);
-        updateLocationStatus("停止定位");
-    }
-
-    private void updateLocationStatus(String message) {
-        Log.d(TAG, "updateLocationStatus: " + message + "\n---\n");
-    }
-
-    private void permissions() {
-        if (Build.VERSION.SDK_INT >= 23) {
-            String[] permissions = {
-                    Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-            };
-            if (checkSelfPermission(permissions[0]) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(permissions, 0);
-            }
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //可在此继续其他操作。
-        switch (requestCode) {
-            case 0:
-                if (PackageManager.PERMISSION_GRANTED != grantResults[0]) {
-                    System.exit(0);
-                }
-                break;
-        }
-    }
-
     private void sendMac() {
         if (!flag) return;
-        mProbe.startScan(new WifiProbeManager.MacListListener() {
+        Log.d(TAG, "macList: " + mMacList);
+        JSONArray jsonArray = new JSONArray(mMacList);
+        Map parmas = new HashMap();
+        parmas.put("lat", lat + "");
+        parmas.put("lng", lng + "");
+        parmas.put("mac", jsonArray.toString());
+        mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
             @Override
-            public void macList(final List<String> macList) {
-                //因为在线程中进行扫描的，所以要切换到主线程
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d(TAG, "macList: " + macList);
-                        JSONArray jsonArray = new JSONArray(macList);
-                        Map parmas = new HashMap();
-                        parmas.put("lat", lat + "");
-                        parmas.put("lng", lng + "");
-                        parmas.put("mac", jsonArray.toString());
-                        mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
-                            @Override
-                            public void onError(Exception e) {
-                            }
+            public void onError(Exception e) {
+            }
 
-                            @Override
-                            public void onSuccess(List<MacLogs> response, String info) {
-                                Log.d(TAG, "onSuccess: " + response);
-                                mAdapter.setData(response);
-                            }
-                        });
-
-                    }
-                });
+            @Override
+            public void onSuccess(List<MacLogs> response, String info) {
+                Log.d(TAG, "onSuccess: " + response);
+                mAdapter.setData(response);
             }
         });
     }
 
+    // 创建菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
@@ -360,8 +237,4 @@ public class MainActivity extends AppCompatActivity implements TencentLocationLi
         super.onDestroy();
     }
 
-    @Override
-    public void onStatusUpdate(String name, int status, String desc) {
-        Log.d(TAG, "onLocationChanged: " + name + "," + status + "," + desc);
-    }
 }
