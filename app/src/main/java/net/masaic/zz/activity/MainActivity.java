@@ -74,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     public void accept(Permission permission) throws Exception {
                         if (permission.granted) {
                             // 已经同意该权限
+                            Log.d(TAG, "accept: granted");
                             initData();
                         } else {
                             // 拒绝了该权限
@@ -89,7 +90,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-
+        // 发送mac
+        iniMac();
         // 列表
         mRecyclerView = findViewById(R.id.recycler_view);
         //  RecyclerView
@@ -111,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "macList: " + macList);
             }
         });
-        RxTool.delayToDo(3000, new OnSimpleListener() {
+        RxTool.delayToDo(500, new OnSimpleListener() {
             @Override
             public void doSomething() {
                 JSONArray jsonArray = new JSONArray(mMacList);

@@ -64,19 +64,16 @@ public class WifiProbeManager {
         NetBios netBios = null;
         try {
             netBios = new NetBios();
-
             for (int i = 0; i < mScanList.size(); i++) {
                 netBios.setIp(mScanList.get(i));
                 netBios.setPort(Constant.NETBIOS_PORT);
                 netBios.send();
-
             }
             netBios.close();//这里放里面 下面需要捕获到异常
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-
     /**
      * 从proc/net/arp中读取ip_mac不需要root ，   如果有root权限 可以通过RE管理器去这个文件夹下查看
      */
@@ -86,14 +83,16 @@ public class WifiProbeManager {
             BufferedReader br = new BufferedReader(new FileReader(
                     "/proc/net/arp"));
             String line;
-
             while ((line = br.readLine()) != null) {
+                // IP address       HW type     Flags       HW address            Mask     Device
+                // 10.1.69.234      0x1         0x2         38:53:9c:77:1b:b1     *        wlan0
+                // Log.d(TAG, "getConnectedHotMac: " + line);
                 String[] splitted = line.split(" +");
                 if (splitted != null && splitted.length >= 4) {
+                    if (splitted[2].equals("0x0")) continue;
                     String mac = splitted[3];
                     if (mac.matches("..:..:..:..:..:..") && !mac.equals("00:00:00:00:00:00"))
                         connectedMac.add(mac);
-
                 }
             }
         } catch (Exception e) {
