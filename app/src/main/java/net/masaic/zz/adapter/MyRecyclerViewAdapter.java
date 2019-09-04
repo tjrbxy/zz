@@ -52,7 +52,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public void onBindViewHolder(@NonNull MyViewHolder myViewHolder, int position) {
 
-        myViewHolder.mIcon.setImageResource(getIcon(position));
+        myViewHolder.mIcon.setImageResource(getIcon(mData.get(position).getIcon()));
         myViewHolder.mName.setText(mData.get(position).getName());
         myViewHolder.mSafety.setText(mData.get(position).getSafety());
     }

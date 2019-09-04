@@ -1,13 +1,10 @@
 package net.masaic.zz.biz;
 
-import android.util.Log;
-
 import com.zhy.http.okhttp.OkHttpUtils;
 
 import net.masaic.zz.bean.MacLogs;
 import net.masaic.zz.net.CommonCallback;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
