@@ -20,7 +20,8 @@ import java.util.List;
  * 2. 绑定 ViewHolder
  * 3. 实现Adapter 的相关方法
  */
-public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter.MyViewHolder> {
+public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAdapter
+        .MyViewHolder> {
 
     private static final String TAG = "MyRecyclerViewAdapter-app";
     private List<String> dataSource;
@@ -44,7 +45,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @NonNull
     @Override
     public MyViewHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int position) {
-        return new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item, viewGroup, false));
+        return new MyViewHolder(LayoutInflater.from(mContext).inflate(R.layout.item, viewGroup,
+                false));
     }
 
     @Override
@@ -52,10 +54,32 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         myViewHolder.mIcon.setImageResource(getIcon(position));
         myViewHolder.mName.setText(mData.get(position).getName());
+        myViewHolder.mSafety.setText(mData.get(position).getSafety());
     }
 
     private int getIcon(int position) {
-        return R.mipmap.icon_1;
+        switch (position) {
+            case 1:
+                return R.drawable.icon_1;
+            case 2:
+                return R.drawable.icon_2;
+            case 3:
+                return R.drawable.icon_3;
+            case 4:
+                return R.drawable.icon_4;
+            case 5:
+                return R.drawable.icon_5;
+            case 6:
+                return R.drawable.icon_6;
+            case 7:
+                return R.drawable.icon_7;
+            case 8:
+                return R.drawable.icon_8;
+            case 9:
+                return R.drawable.icon_9;
+            default:
+                return R.drawable.icon_1;
+        }
     }
 
     @Override
@@ -65,6 +89,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     class MyViewHolder extends RecyclerView.ViewHolder {
 
+        TextView mSafety;
         ImageView mIcon;
         TextView mName;
 
@@ -72,7 +97,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
             super(itemView);
             mName = itemView.findViewById(R.id.name);
             mIcon = itemView.findViewById(R.id.icon);
-
+            mSafety = itemView.findViewById(R.id.safety);
         }
     }
 }

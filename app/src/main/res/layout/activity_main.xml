@@ -1,4 +1,5 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:scrollbars="vertical">
@@ -16,61 +17,24 @@
 
         </android.support.v7.widget.RecyclerView>
 
-
-        <TextView
+        <WebView
+            android:id="@+id/web_view"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:text="《警告》"
-            android:textSize="18dp" />
+            tools:ignore="WebViewLayout">
 
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:lineSpacingExtra="10dp"
-            android:padding="10dp"
-            android:text="@string/waring" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="《为什么建议您购买商业版》"
-            android:textColor="@color/TitleColor"
-            android:textSize="18dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:lineSpacingExtra="10dp"
-            android:padding="10dp"
-            android:text="@string/proposal" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="《联系》"
-            android:textSize="18dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:lineSpacingExtra="10dp"
-            android:padding="10dp"
-            android:text="@string/contact" />
+        </WebView>
 
         <Button
             android:id="@+id/check"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:background="@color/colorPrimary"
+            android:background="@drawable/round_button"
             android:onClick="onClick"
-            android:paddingLeft="20dp"
-            android:paddingTop="4dp"
-            android:paddingRight="20dp"
-            android:paddingBottom="4dp"
             android:text="@string/check"
             android:textColor="@color/FontButtonColor"
-            android:textSize="20dp" />
+            android:textSize="20dp"
+            android:visibility="visible" />
     </LinearLayout>
 </ScrollView>

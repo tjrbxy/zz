@@ -3,8 +3,6 @@ package net.masaic.zz.activity;
 import android.Manifest;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.location.Address;
-import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +15,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -60,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private Timer mTimer;
     // 权限
     final RxPermissions rxPermissions = new RxPermissions(this);
+    private WebSettings settings;
 
 
     @Override
@@ -68,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // WIFI
         mProbe = new WifiProbeManager();
-        Log.d(TAG, "onCreate: ");
         // 检测Mac
         initScan();
         // 权限
@@ -101,6 +102,19 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setLayoutManager(linearLayoutManager);
         mAdapter = new MyRecyclerViewAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
+
+        WebView webView = findViewById(R.id.web_view);//绑定ID
+        webView.setWebViewClient(new WebViewClient());//添加WebViewClient实例
+        settings = webView.getSettings();
+        /**关闭webview中缓存**/
+        settings.setJavaScriptEnabled(true); // 支持js
+        settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+        settings.setTextZoom(100);
+        settings.setUseWideViewPort(true);
+        settings.setLoadWithOverviewMode(true);
+
+        webView.loadUrl("https://zz.masaic.net/web.html");//添加浏览器地址
+
     }
 
     /**

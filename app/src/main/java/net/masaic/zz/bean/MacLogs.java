@@ -3,13 +3,13 @@ package net.masaic.zz.bean;
 public class MacLogs {
     private String name;
     private int icon;
-    private int safety;
+    private String safety;
 
     public MacLogs() {
 
     }
 
-    public MacLogs(String name, int icon, int safety) {
+    public MacLogs(String name, int icon, String safety) {
         this.name = name;
         this.icon = icon;
         this.safety = safety;
@@ -32,11 +32,11 @@ public class MacLogs {
         this.icon = icon;
     }
 
-    public int getSafety() {
+    public String getSafety() {
         return safety;
     }
 
-    public void setSafety(int safety) {
+    public void setSafety(String safety) {
         this.safety = safety;
     }
 }
