@@ -16,6 +16,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -32,12 +33,12 @@ import net.masaic.zz.wifi_probe.WifiProbeManager;
 
 import org.json.JSONArray;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import io.reactivex.functions.Consumer;
 
@@ -47,26 +48,29 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private MyRecyclerViewAdapter mAdapter;
     private MacLogsBiz mMacLogsBiz = new MacLogsBiz();
+    private List<MacLogs> mMacListLogs = new ArrayList<>();
+
     private double lat = 0;
     private double lng = 0;
     private boolean flag = true;
-
     //wifi探针
+    private int WiFi_time = 30 * 1000;//30秒扫描一次
     private WifiProbeManager mProbe;
     private List mMacList = new ArrayList<>();
-
+    private Timer mTimer;
     // 权限
     final RxPermissions rxPermissions = new RxPermissions(this);
 
-    // 地址
-    private Geocoder geocoder;
-    private List<Address> addressList;
-    private StringBuilder sb;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // WIFI
+        mProbe = new WifiProbeManager();
+        Log.d(TAG, "onCreate: ");
+        // 检测Mac
+        initScan();
         // 权限
         rxPermissions.requestEach(Manifest.permission.ACCESS_FINE_LOCATION)
                 .subscribe(new Consumer<Permission>() {
@@ -74,7 +78,7 @@ public class MainActivity extends AppCompatActivity {
                     public void accept(Permission permission) throws Exception {
                         if (permission.granted) {
                             // 已经同意该权限
-                            Log.d(TAG, "accept: granted");
+                            Log.d(TAG, "已同意授权");
                             initData();
                         } else {
                             // 拒绝了该权限
@@ -90,8 +94,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
-        // 发送mac
-        iniMac();
         // 列表
         mRecyclerView = findViewById(R.id.recycler_view);
         //  RecyclerView
@@ -101,40 +103,60 @@ public class MainActivity extends AppCompatActivity {
         mRecyclerView.setAdapter(mAdapter);
     }
 
-    private void iniMac() {
-        if (!flag) return;
-        // WIFI
-        mProbe = new WifiProbeManager();
+    /**
+     * 检测mac
+     */
+    private void initScan() {
+        mTimer = new Timer();
+        mTimer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                startScan();
+            }
+        }, 0, WiFi_time);
+    }
+
+    private void startScan() {
+        Log.d(TAG, "startScan: ");
         mProbe.startScan(new WifiProbeManager.MacListListener() {
             @Override
             public void macList(final List<String> macList) {
-                mMacList.clear();
-                mMacList.addAll(macList);
-                Log.d(TAG, "macList: " + macList);
-            }
-        });
-        RxTool.delayToDo(500, new OnSimpleListener() {
-            @Override
-            public void doSomething() {
-                JSONArray jsonArray = new JSONArray(mMacList);
-                Map parmas = new HashMap();
-                parmas.put("lat", lat + "");
-                parmas.put("lng", lng + "");
-                parmas.put("mac", jsonArray.toString());
-                mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
+                //因为在线程中进行扫描的，所以要切换到主线程
+                runOnUiThread(new Runnable() {
                     @Override
-                    public void onError(Exception e) {
-                    }
-
-                    @Override
-                    public void onSuccess(List<MacLogs> response, String info) {
-                        Log.d(TAG, "onSuccess: " + response);
-                        mAdapter.setData(response);
+                    public void run() {
+                        mMacList.clear();
+                        mMacList.addAll(macList);
+                        Log.d(TAG, "获取到的Mac列表：" + mMacList);
                     }
                 });
             }
         });
+    }
 
+    private void initSendMac() {
+        mAdapter.setData(mMacListLogs);
+        if (mMacList.size() > 0) {
+            JSONArray jsonArray = new JSONArray(mMacList);
+            Map parmas = new HashMap();
+            parmas.put("lat", lat + "");
+            parmas.put("lng", lng + "");
+            parmas.put("mac", jsonArray.toString());
+            Log.d(TAG, "initSendMac: " + jsonArray.toString());
+            mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
+                @Override
+                public void onError(Exception e) {
+                    T.showToast(e.getMessage());
+                    return;
+                }
+
+                @Override
+                public void onSuccess(List<MacLogs> response, String info) {
+                    Log.d(TAG, "onSuccess: " + response);
+                    mAdapter.setData(response);
+                }
+            });
+        }
 
     }
 
@@ -166,13 +188,15 @@ public class MainActivity extends AppCompatActivity {
         lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
+                T.showToast("获取经纬度");
                 // 获取经纬度主要方法
                 lat = location.getLatitude();
                 lng = location.getLongitude();
                 // 发送地址
-                iniMac();
-                flag = false;
-                Log.d(TAG, "latitude" + lat + "  " + "longitude" + lng);
+                T.showToast("latitude:" + lat + "  " + "longitude:" + lng);
+                // if (flag) initSendMac();
+                Log.d(TAG, "latitude:" + lat + "  " + "longitude:" + lng);
+/*                Log.d(TAG, "latitude" + lat + "  " + "longitude" + lng);
                 sb = new StringBuilder();
                 geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
                 addressList = new ArrayList<Address>();
@@ -191,47 +215,30 @@ public class MainActivity extends AppCompatActivity {
                     // tvAddress.setText();
                 } catch (IOException e) {
                     e.printStackTrace();
-                }
+                }*/
             }
 
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
                 //状态发生改变监听
+                T.showToast("状态发生改变监听");
             }
 
             @Override
             public void onProviderEnabled(String s) {
                 // GPS 开启的事件监听
+                T.showToast("GPS 开启的事件监听");
             }
 
             @Override
             public void onProviderDisabled(String s) {
                 // GPS 关闭的事件监听
+                T.showToast("GPS 关闭的事件监听");
             }
         });
     }
 
     /***********************************/
-    private void sendMac() {
-        if (!flag) return;
-        Log.d(TAG, "macList: " + mMacList);
-        JSONArray jsonArray = new JSONArray(mMacList);
-        Map parmas = new HashMap();
-        parmas.put("lat", lat + "");
-        parmas.put("lng", lng + "");
-        parmas.put("mac", jsonArray.toString());
-        mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
-            @Override
-            public void onError(Exception e) {
-            }
-
-            @Override
-            public void onSuccess(List<MacLogs> response, String info) {
-                Log.d(TAG, "onSuccess: " + response);
-                mAdapter.setData(response);
-            }
-        });
-    }
 
     // 创建菜单
     @Override
@@ -240,13 +247,14 @@ public class MainActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         Log.d(TAG, "onOptionsItemSelected: " + item);
         switch (item.getItemId()) {
             case R.id.refresh:
-                flag = true;
-                iniMac();
+                // 发送
+                initSendMac();
                 T.showToast("成功刷新！");
                 break;
             default:
@@ -256,8 +264,36 @@ public class MainActivity extends AppCompatActivity {
 
 
     @Override
+    protected void onStop() {
+        super.onStop();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
     }
 
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.check:
+
+                if (mMacList.size() == 0) {
+                    T.showToast("30秒后重试！");
+                    return;
+                }
+                initSendMac();
+                break;
+
+        }
+    }
 }

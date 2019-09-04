@@ -8,6 +8,7 @@ import java.io.IOException;
 
  */
 public class NetBios extends UdpCommunicate {
+    private static final String TAG = "NetBios-app";
     private static final String tag = NetBios.class.getSimpleName();
     private String mIP;
     private int mPort;

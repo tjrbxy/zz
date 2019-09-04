@@ -6,6 +6,7 @@ package net.masaic.zz.wifi_probe;
 
 public class Constant {
 
+    private static final String TAG = "Constant-app";
     //下面是wifi探针的常亮
     public static final int COUNT = 255;
 

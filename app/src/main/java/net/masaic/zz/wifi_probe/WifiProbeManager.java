@@ -13,19 +13,24 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+/**
+ * Created by Administrator on 2017/3/8 0008.
+ */
 
 public class WifiProbeManager {
-
     private static final String TAG = "WifiProbeManager-app";
     /**
      * 被扫描的所有ip地址
      */
     private List<String> mScanList = new ArrayList<>();
     private String mLocalIp = "";
+
     private MacListListener mListener;
 
     public WifiProbeManager() {
+
         addAllLocalIp();
+
     }
 
     /**
@@ -34,7 +39,7 @@ public class WifiProbeManager {
     private void addAllLocalIp() {
         if (mLocalIp.equals(getLocalIp())) return;
         mLocalIp = getLocalIp();
-        Log.d("wifi-ip", "WifiProbeManager: " + mLocalIp);
+        Log.d(TAG, "本机IP: " + mLocalIp);
         if (TextUtils.isEmpty(mLocalIp))
             return;
         mScanList.clear();
@@ -74,6 +79,7 @@ public class WifiProbeManager {
             e.printStackTrace();
         }
     }
+
     /**
      * 从proc/net/arp中读取ip_mac不需要root ，   如果有root权限 可以通过RE管理器去这个文件夹下查看
      */
@@ -84,12 +90,8 @@ public class WifiProbeManager {
                     "/proc/net/arp"));
             String line;
             while ((line = br.readLine()) != null) {
-                // IP address       HW type     Flags       HW address            Mask     Device
-                // 10.1.69.234      0x1         0x2         38:53:9c:77:1b:b1     *        wlan0
-                // Log.d(TAG, "getConnectedHotMac: " + line);
                 String[] splitted = line.split(" +");
                 if (splitted != null && splitted.length >= 4) {
-                    if (splitted[2].equals("0x0")) continue;
                     String mac = splitted[3];
                     if (mac.matches("..:..:..:..:..:..") && !mac.equals("00:00:00:00:00:00"))
                         connectedMac.add(mac);
@@ -98,7 +100,6 @@ public class WifiProbeManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         return connectedMac;
     }
 
@@ -107,7 +108,6 @@ public class WifiProbeManager {
      */
     private String getLocalIp() {
         String localIp = "";
-
         try {
             Enumeration<NetworkInterface> en
                     = NetworkInterface.getNetworkInterfaces();
