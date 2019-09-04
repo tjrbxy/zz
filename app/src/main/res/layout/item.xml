@@ -31,10 +31,10 @@
         android:text="安全" />
 
     <Button
-        android:layout_width="20dp"
-        android:layout_height="26dp"
-        android:layout_weight="1"
+        android:layout_width="72.5dp"
+        android:layout_height="30dp"
         android:background="@drawable/zz"
         android:gravity="center_vertical"
-        android:textColor="@color/FontButtonColor" />
+        android:textColor="@color/FontButtonColor"
+        android:visibility="visible" />
 </LinearLayout>
