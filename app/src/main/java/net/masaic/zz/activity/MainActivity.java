@@ -70,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // WebView
+        initWebView();
         // WIFI
         mProbe = new WifiProbeManager();
         // 检测Mac
@@ -85,7 +87,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                             initData();
                         } else {
                             // 拒绝了该权限
-                            T.showToast("本程序2秒后退出，请允许获取地理位置");
+                            T.Toast("本程序2秒后退出，请允许获取地理位置");
                             // System.exit(0);
                             RxTool.delayToDo(2000, new OnSimpleListener() {
                                 @Override
@@ -98,9 +100,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
                     }
                 });
         initRecyclerView();
-        // WebView
-        initWebView();
-
     }
 
     private void initRecyclerView() {
@@ -114,7 +113,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         mBaseAdapter = new BaseRecyclerViewAdapter<MacLogs>(mMacListLogs, R.layout.item, this) {
             @Override
             protected void onBindViewHolder(MyViewHolder holder, MacLogs model, int position) {
-                holder.text(R.id.safety, model.getSafety());
+                holder.text(R.id.grade, model.getSafety());
                 holder.text(R.id.name, model.getName());
                 holder.image(R.id.icon, getIcon(model.getIcon()));
             }
@@ -183,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
                 @Override
                 public void onError(Exception e) {
-                    T.showToast(e.getMessage());
+                    T.Toast(e.getMessage());
                     return;
                 }
 
@@ -227,12 +226,12 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                T.showToast("获取经纬度");
+                // T.showToast("获取经纬度");
                 // 获取经纬度主要方法
                 lat = location.getLatitude();
                 lng = location.getLongitude();
                 // 发送地址
-                T.showToast("latitude:" + lat + "  " + "longitude:" + lng);
+                // T.showToast("latitude:" + lat + "  " + "longitude:" + lng);
                 // if (flag) initSendMac();
                 Log.d(TAG, "latitude:" + lat + "  " + "longitude:" + lng);
 /*                Log.d(TAG, "latitude" + lat + "  " + "longitude" + lng);
@@ -260,19 +259,19 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             @Override
             public void onStatusChanged(String s, int i, Bundle bundle) {
                 //状态发生改变监听
-                T.showToast("状态发生改变监听");
+                // T.showToast("状态发生改变监听");
             }
 
             @Override
             public void onProviderEnabled(String s) {
                 // GPS 开启的事件监听
-                T.showToast("GPS 开启的事件监听");
+                // T.showToast("GPS 开启的事件监听");
             }
 
             @Override
             public void onProviderDisabled(String s) {
                 // GPS 关闭的事件监听
-                T.showToast("GPS 关闭的事件监听");
+                // T.showToast("GPS 关闭的事件监听");
             }
         });
     }
@@ -339,6 +338,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         Log.d(TAG, "onItemClick: parent" + parent + ", view" + view + ", position" + position +
                 ", id" + id);
+        T.Toast("免费版无此功能，请购买商业版！", 3000);
     }
     //</editor-fold>
 

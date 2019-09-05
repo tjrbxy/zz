@@ -10,15 +10,28 @@ public class T {
 
     private static Toast toast;
 
+    public static void init(Context context) {
+        toast = Toast.makeText(context,
+                "",
+                Toast.LENGTH_SHORT);
+    }
+
     public static void showToast(
             String content) {
         toast.setText(content);
         toast.show();
     }
 
-    public static void init(Context context) {
-        toast = Toast.makeText(context,
-                "",
-                Toast.LENGTH_SHORT);
+    public static void Toast(
+            String content) {
+        toast.setText(content);
+        toast.show();
+    }
+
+
+    public static void Toast(String content, int num) {
+        toast.setText(content);
+        toast.setDuration(num);
+        toast.show();
     }
 }

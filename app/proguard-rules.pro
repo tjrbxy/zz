@@ -81,3 +81,7 @@
 -dontwarn com.vondear.**
 # okio
 -dontwarn okio.**
+
+#--------------------------3.-------------------------------
+# json 对应的实体类不混淆
+-keep class net.masaic.zz.bean.** {*;}
