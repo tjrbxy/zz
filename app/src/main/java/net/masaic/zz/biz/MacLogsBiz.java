@@ -21,4 +21,15 @@ public class MacLogsBiz extends BaseBiz {
                 .build()
                 .execute(commonCallback);
     }
+
+    public void index(Map parmas, CommonCallback<List<MacLogs>> commonCallback) {
+        String url = this.API_URL + "api/v7/mac";
+        OkHttpUtils
+                .get()
+                .url(url)
+                .params(parmas)
+                .build()
+                .execute(commonCallback);
+    }
+
 }

@@ -18,6 +18,7 @@ import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.AdapterView;
 
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -25,7 +26,8 @@ import com.vondear.rxtool.RxTool;
 import com.vondear.rxtool.interfaces.OnSimpleListener;
 
 import net.masaic.zz.R;
-import net.masaic.zz.adapter.MyRecyclerViewAdapter;
+import net.masaic.zz.adapter.BaseRecyclerViewAdapter;
+import net.masaic.zz.adapter.MyViewHolder;
 import net.masaic.zz.bean.MacLogs;
 import net.masaic.zz.biz.MacLogsBiz;
 import net.masaic.zz.net.CommonCallback;
@@ -43,11 +45,11 @@ import java.util.TimerTask;
 
 import io.reactivex.functions.Consumer;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = "MainActivity-app";
     private RecyclerView mRecyclerView;
-    private MyRecyclerViewAdapter mAdapter;
+    private BaseRecyclerViewAdapter mBaseAdapter;
     private MacLogsBiz mMacLogsBiz = new MacLogsBiz();
     private List<MacLogs> mMacListLogs = new ArrayList<>();
 
@@ -95,14 +97,36 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+        initRecyclerView();
+        // WebView
+        initWebView();
+
+    }
+
+    private void initRecyclerView() {
         // 列表
         mRecyclerView = findViewById(R.id.recycler_view);
-        //  RecyclerView
+        //  RecyclerView 下面两行如果没有 数据不显示
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
-        mAdapter = new MyRecyclerViewAdapter(this);
-        mRecyclerView.setAdapter(mAdapter);
 
+        // 适配器
+        mBaseAdapter = new BaseRecyclerViewAdapter<MacLogs>(mMacListLogs, R.layout.item, this) {
+            @Override
+            protected void onBindViewHolder(MyViewHolder holder, MacLogs model, int position) {
+                holder.text(R.id.safety, model.getSafety());
+                holder.text(R.id.name, model.getName());
+                holder.image(R.id.icon, getIcon(model.getIcon()));
+            }
+        };
+        mRecyclerView.setAdapter(mBaseAdapter);
+    }
+    //<editor-fold desc="WebView">
+
+    /**
+     * WebView
+     */
+    private void initWebView() {
         WebView webView = findViewById(R.id.web_view);//绑定ID
         webView.setWebViewClient(new WebViewClient());//添加WebViewClient实例
         settings = webView.getSettings();
@@ -112,10 +136,9 @@ public class MainActivity extends AppCompatActivity {
         settings.setTextZoom(100);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
-
         webView.loadUrl("https://zz.masaic.net/web.html");//添加浏览器地址
-
     }
+    //</editor-fold>
 
     /**
      * 检测mac
@@ -149,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initSendMac() {
-        mAdapter.setData(mMacListLogs);
+        // mAdapter.setData(mMacListLogs);
         if (mMacList.size() > 0) {
             JSONArray jsonArray = new JSONArray(mMacList);
             Map parmas = new HashMap();
@@ -167,7 +190,9 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(List<MacLogs> response, String info) {
                     Log.d(TAG, "onSuccess: " + response);
-                    mAdapter.setData(response);
+                    // mAdapter.setData(response);
+                    // 刷新数据
+                    mBaseAdapter.refresh(response);
                 }
             });
         }
@@ -252,19 +277,15 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    /***********************************/
-
-    // 创建菜单
+    // <editor-fold desc="Menu">
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.activity_main, menu);
         return super.onCreateOptionsMenu(menu);
     }
 
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        Log.d(TAG, "onOptionsItemSelected: " + item);
         switch (item.getItemId()) {
             case R.id.refresh:
                 // 发送
@@ -275,8 +296,9 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
     }
+    //</editor-fold>
 
-
+    //<editor-fold desc="MainActivity">
     @Override
     protected void onStop() {
         super.onStop();
@@ -297,10 +319,12 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
+    //</editor-fold>
+
+    //<editor-fold desc="Event">
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.check:
-
                 if (mMacList.size() == 0) {
                     T.showToast("30秒后重试！");
                     return;
@@ -308,6 +332,39 @@ public class MainActivity extends AppCompatActivity {
                 initSendMac();
                 break;
 
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        Log.d(TAG, "onItemClick: parent" + parent + ", view" + view + ", position" + position +
+                ", id" + id);
+    }
+    //</editor-fold>
+
+
+    private int getIcon(int position) {
+        switch (position) {
+            case 1:
+                return R.drawable.icon_1;
+            case 2:
+                return R.drawable.icon_2;
+            case 3:
+                return R.drawable.icon_3;
+            case 4:
+                return R.drawable.icon_4;
+            case 5:
+                return R.drawable.icon_5;
+            case 6:
+                return R.drawable.icon_6;
+            case 7:
+                return R.drawable.icon_7;
+            case 8:
+                return R.drawable.icon_8;
+            case 9:
+                return R.drawable.icon_9;
+            default:
+                return R.drawable.icon_1;
         }
     }
 }
