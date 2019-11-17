@@ -58,7 +58,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@null"
-                    android:hint="请输入用户名"
+                    android:hint="请输入手机号"
                     android:inputType="textVisiblePassword"
                     android:maxLength="11"
                     android:singleLine="true"
@@ -126,6 +126,55 @@
                     android:src="@drawable/pass_gone"/>
 
             </LinearLayout>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1px"
+                android:background="@color/e"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="55dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingLeft="13dp">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginRight="15dp"
+                    android:src="@drawable/ic_password_flag"/>
+
+                <EditText
+                    android:id="@+id/et_password2"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@null"
+                    android:hint="请再输入密码"
+                    android:inputType="textPassword"
+                    android:maxLength="30"
+                    android:singleLine="true"
+                    android:text=""
+                    android:textColor="@color/_9"
+                    android:textColorHint="@color/_9"
+                    android:textSize="14dp"/>
+
+                <ImageView
+                    android:id="@+id/clean_password2"
+                    android:layout_width="40dp"
+                    android:layout_height="fill_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/ic_clear"
+                    android:visibility="gone"/>
+
+                <ImageView
+                    android:id="@+id/iv_show_pwd2"
+                    android:layout_width="40dp"
+                    android:layout_height="fill_parent"
+                    android:scaleType="centerInside"
+                    android:src="@drawable/pass_gone"/>
+
+            </LinearLayout>
 
             <View
                 android:layout_width="match_parent"
@@ -139,7 +188,7 @@
                 android:layout_marginBottom="10dp"
                 android:layout_marginTop="21dp"
                 android:background="@drawable/round_button"
-                android:text="@string/login"
+                android:text="@string/register"
                 android:textColor="@color/white"
                 android:textSize="18dp"/>
 
@@ -147,32 +196,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
-
-                <TextView
-                    android:id="@+id/regist"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:paddingTop="10dp"
-                    android:paddingBottom="10dp"
-                    android:layout_weight="1"
-                    android:text="注册新用户"
-                    android:textColor="#b0b8b2"
-                    android:textSize="14dp"/>
-
-                <TextView
-                    android:id="@+id/forget_password"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_marginBottom="10dp"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginLeft="21dp"
-                    android:text=""
-                    android:textColor="#b0b8b2"
-                    android:textSize="14dp"/>
 
             </LinearLayout>
 
@@ -214,5 +237,4 @@
             android:textSize="14dp"/>
 
     </LinearLayout>
-
 </RelativeLayout>

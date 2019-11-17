@@ -3,6 +3,7 @@ package net.masaic.zz.net;
 import android.util.Log;
 
 
+import com.vondear.rxtool.view.RxToast;
 import com.zhy.http.okhttp.callback.StringCallback;
 
 import net.masaic.zz.utils.GsonUtil;
@@ -39,15 +40,23 @@ public abstract class CommonCallback<T> extends StringCallback {
 
     @Override
     public void onResponse(String response, int id) {
-        Log.d(TAG, "onResponse: " + response);
+        Log.d(TAG, "onResponse: " + response + "mType" +mType);
         try {
             JSONObject resp = new JSONObject(response);
             int code = resp.getInt("code");
             String info = resp.getString("info");
             if (code == 200) {
-                String data = resp.getString("data");
-                onSuccess((T) GsonUtil.getGson().fromJson(data, mType), info);
-            } else {
+                if(resp.has("data")){
+                    String data = resp.getString("data");
+                    onSuccess((T) GsonUtil.getGson().fromJson(data, mType), info);
+                }else {
+                    onSuccess((T) GsonUtil.getGson().fromJson(response, mType), info);
+                }
+
+            } else if (201 == code){
+                RxToast.error(info);
+                return;
+            }else {
                 onError(new RuntimeException(info));
             }
         } catch (JSONException e) {

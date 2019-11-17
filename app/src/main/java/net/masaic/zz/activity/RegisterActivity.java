@@ -21,7 +21,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.vondear.rxtool.RxAnimationTool;
 import com.vondear.rxtool.RxBarTool;
@@ -30,7 +29,7 @@ import com.vondear.rxtool.view.RxToast;
 import com.vondear.rxui.activity.AndroidBug5497Workaround;
 
 import net.masaic.zz.R;
-import net.masaic.zz.bean.User;
+import net.masaic.zz.bean.Res;
 import net.masaic.zz.biz.UserBiz;
 import net.masaic.zz.net.CommonCallback;
 
@@ -41,7 +40,10 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class LoginActivity extends AppCompatActivity {
+/**
+ *
+ */
+public class RegisterActivity extends AppCompatActivity {
 
     @BindView(R.id.logo)
     ImageView mLogo;
@@ -51,16 +53,21 @@ public class LoginActivity extends AppCompatActivity {
     ImageView mIvCleanPhone;
     @BindView(R.id.et_password)
     EditText mEtPassword;
+    @BindView(R.id.et_password2)
+    EditText mEtPassword2;
+
     @BindView(R.id.clean_password)
     ImageView mCleanPassword;
+    @BindView(R.id.clean_password2)
+    ImageView mCleanPassword2;
+
     @BindView(R.id.iv_show_pwd)
     ImageView mIvShowPwd;
+    @BindView(R.id.iv_show_pwd2)
+    ImageView mIvShowPwd2;
+
     @BindView(R.id.btn_login)
     Button mBtnLogin;
-    @BindView(R.id.regist)
-    TextView mRegist;
-    @BindView(R.id.forget_password)
-    TextView mForgetPassword;
     @BindView(R.id.content)
     LinearLayout mContent;
     @BindView(R.id.scrollView)
@@ -74,14 +81,16 @@ public class LoginActivity extends AppCompatActivity {
     private int keyHeight = 0; //软件盘弹起后所占高度
     private float scale = 0.6f; //logo缩放比例
     private int height = 0;
-    private static final String TAG = "LoginActivity-app";
+    private static final String TAG = "RegisterActivity-app";
     private UserBiz mUserBiz = new UserBiz();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_register);
+
+
         RxBarTool.setTransparentStatusBar(this);//状态栏透明化
         RxBarTool.StatusBarLightMode(this);
         ButterKnife.bind(this);
@@ -196,6 +205,8 @@ public class LoginActivity extends AppCompatActivity {
 
                 String mobile = mEtMobile.getText().toString();
                 String passsord = mEtPassword.getText().toString();
+                String repasssord = mEtPassword2.getText().toString();
+
                 if ( TextUtils.isEmpty(mobile)){
                     RxToast.error("用户名不能为空");
                     return;
@@ -208,28 +219,35 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
+                if ( !passsord.equals(repasssord) ){
+                    RxToast.error("两次密码不一致");
+                    return;
+                }
+
+
                 Map parmas = new HashMap();
 
                 parmas.put("mobile",mobile);
                 parmas.put("password",passsord);
 
-                mUserBiz.login(parmas, new CommonCallback<User>() {
+                mUserBiz.register(parmas, new CommonCallback<Res>() {
+
+
                     @Override
                     public void onError(Exception e) {
-                       RxToast.error(e.getMessage());
+                        RxToast.error(e.getMessage());
                     }
 
                     @Override
-                    public void onSuccess(User response, String info) {
-                        // 登陆成功
+                    public void onSuccess(Res response, String info) {
+                        Log.d(TAG, "onSuccess: " + response);
                         RxToast.success(info);
-                        Log.d(TAG, "onSuccess: " + response.getToken());
-                        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                        Intent intent = new Intent(RegisterActivity.this,LoginActivity.class);
                         startActivity(intent);
 
                     }
                 });
-                RxKeyboardTool.hideSoftInput(LoginActivity.this);
+                RxKeyboardTool.hideSoftInput(RegisterActivity.this);
             }
         });
 
@@ -241,7 +259,7 @@ public class LoginActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN;
     }
 
-    @OnClick({R.id.iv_clean_phone, R.id.clean_password, R.id.iv_show_pwd,R.id.regist})
+    @OnClick({R.id.iv_clean_phone, R.id.clean_password, R.id.iv_show_pwd})
     public void onViewClicked(View view) {
         Log.d(TAG, "onViewClicked: " +view.getId());
         switch (view.getId()) {
@@ -263,13 +281,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (!TextUtils.isEmpty(pwd))
                     mEtPassword.setSelection(pwd.length());
                 break;
-
-
-            case R.id.regist:
-                //注册跳转
-                Intent intent = new Intent(LoginActivity.this,RegisterActivity.class);
-                startActivity(intent);
-                break;
         }
     }
 }
+
