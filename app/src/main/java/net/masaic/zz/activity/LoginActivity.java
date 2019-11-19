@@ -21,7 +21,6 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.TextView;
 
 import com.vondear.rxtool.RxAnimationTool;
 import com.vondear.rxtool.RxBarTool;
@@ -33,6 +32,7 @@ import net.masaic.zz.R;
 import net.masaic.zz.bean.User;
 import net.masaic.zz.biz.UserBiz;
 import net.masaic.zz.net.CommonCallback;
+import net.masaic.zz.utils.SPUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -60,10 +60,7 @@ public class LoginActivity extends AppCompatActivity {
     @BindView(R.id.btn_reg)
     Button mBtnReg;
 
-    @BindView(R.id.regist)
-    TextView mRegist;
-    @BindView(R.id.forget_password)
-    TextView mForgetPassword;
+
     @BindView(R.id.content)
     LinearLayout mContent;
     @BindView(R.id.scrollView)
@@ -99,6 +96,18 @@ public class LoginActivity extends AppCompatActivity {
     private void initView() {
         screenHeight = this.getResources().getDisplayMetrics().heightPixels; //获取屏幕高度
         keyHeight = screenHeight / 3;//弹起高度为屏幕高度的1/3
+
+        String mobile = (String) SPUtils.getInstance().get("mobile","");
+        String password = (String) SPUtils.getInstance().get("password","");
+
+        if(mobile.length() > 2){
+            mEtMobile.setText(mobile);
+        }
+
+        if(password.length() > 2){
+            mEtPassword.setText(password);
+        }
+
     }
 
     private void initEvent() {
@@ -200,8 +209,8 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                String mobile = mEtMobile.getText().toString();
-                String passsord = mEtPassword.getText().toString();
+                final String mobile = mEtMobile.getText().toString();
+                final String passsord = mEtPassword.getText().toString();
                 if (TextUtils.isEmpty(mobile)) {
                     RxToast.error("用户名不能为空");
                     return;
@@ -227,6 +236,9 @@ public class LoginActivity extends AppCompatActivity {
 
                     @Override
                     public void onSuccess(User response, String info) {
+
+                        SPUtils.getInstance().put("mobile",mobile);
+                        SPUtils.getInstance().put("password",passsord);
                         // 登陆成功
                         RxToast.success(info);
                         Log.d(TAG, "onSuccess: " + response.getToken());
