@@ -150,7 +150,7 @@
                     android:layout_height="match_parent"
                     android:layout_weight="1"
                     android:background="@null"
-                    android:hint="请再输入密码"
+                    android:hint="请再次输入密码"
                     android:inputType="textPassword"
                     android:maxLength="30"
                     android:singleLine="true"

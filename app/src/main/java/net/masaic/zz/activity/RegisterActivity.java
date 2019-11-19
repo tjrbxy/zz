@@ -211,7 +211,7 @@ public class RegisterActivity extends AppCompatActivity {
                     RxToast.error("用户名不能为空");
                     return;
                 }else if(  11 != mobile.length() ){
-                    RxToast.error("用户名格式错误");
+                    RxToast.error("手机号码格式错误");
                     return;
                 }
                 if ( TextUtils.isEmpty(passsord) ){

@@ -57,6 +57,9 @@ public class LoginActivity extends AppCompatActivity {
     ImageView mIvShowPwd;
     @BindView(R.id.btn_login)
     Button mBtnLogin;
+    @BindView(R.id.btn_reg)
+    Button mBtnReg;
+
     @BindView(R.id.regist)
     TextView mRegist;
     @BindView(R.id.forget_password)
@@ -160,14 +163,16 @@ public class LoginActivity extends AppCompatActivity {
         });
         mScrollView.addOnLayoutChangeListener(new ViewGroup.OnLayoutChangeListener() {
             @Override
-            public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            public void onLayoutChange(View v, int left, int top, int right, int bottom,
+                                       int oldLeft, int oldTop, int oldRight, int oldBottom) {
               /* old是改变前的左上右下坐标点值，没有old的是改变后的左上右下坐标点值
               现在认为只要控件将Activity向上推的高度超过了1/3屏幕高，就认为软键盘弹起*/
                 if (oldBottom != 0 && bottom != 0 && (oldBottom - bottom > keyHeight)) {
                     Log.e("wenzhihao", "up------>" + (oldBottom - bottom));
                     int dist = mContent.getBottom() - bottom;
                     if (dist > 0) {
-                        ObjectAnimator mAnimatorTranslateY = ObjectAnimator.ofFloat(mContent, "translationY", 0.0f, -dist);
+                        ObjectAnimator mAnimatorTranslateY = ObjectAnimator.ofFloat(mContent,
+                                "translationY", 0.0f, -dist);
                         mAnimatorTranslateY.setDuration(300);
                         mAnimatorTranslateY.setInterpolator(new LinearInterpolator());
                         mAnimatorTranslateY.start();
@@ -178,7 +183,8 @@ public class LoginActivity extends AppCompatActivity {
                 } else if (oldBottom != 0 && bottom != 0 && (bottom - oldBottom > keyHeight)) {
 
                     if ((mContent.getBottom() - oldBottom) > 0) {
-                        ObjectAnimator mAnimatorTranslateY = ObjectAnimator.ofFloat(mContent, "translationY", mContent.getTranslationY(), 0);
+                        ObjectAnimator mAnimatorTranslateY = ObjectAnimator.ofFloat(mContent,
+                                "translationY", mContent.getTranslationY(), 0);
                         mAnimatorTranslateY.setDuration(300);
                         mAnimatorTranslateY.setInterpolator(new LinearInterpolator());
                         mAnimatorTranslateY.start();
@@ -196,27 +202,27 @@ public class LoginActivity extends AppCompatActivity {
 
                 String mobile = mEtMobile.getText().toString();
                 String passsord = mEtPassword.getText().toString();
-                if ( TextUtils.isEmpty(mobile)){
+                if (TextUtils.isEmpty(mobile)) {
                     RxToast.error("用户名不能为空");
                     return;
-                }else if(  11 != mobile.length() ){
+                } else if (11 != mobile.length()) {
                     RxToast.error("用户名格式错误");
                     return;
                 }
-                if ( TextUtils.isEmpty(passsord) ){
+                if (TextUtils.isEmpty(passsord)) {
                     RxToast.error("密码不能为空");
                     return;
                 }
 
                 Map parmas = new HashMap();
 
-                parmas.put("mobile",mobile);
-                parmas.put("password",passsord);
+                parmas.put("mobile", mobile);
+                parmas.put("password", passsord);
 
                 mUserBiz.login(parmas, new CommonCallback<User>() {
                     @Override
                     public void onError(Exception e) {
-                       RxToast.error(e.getMessage());
+                        RxToast.error(e.getMessage());
                     }
 
                     @Override
@@ -224,7 +230,7 @@ public class LoginActivity extends AppCompatActivity {
                         // 登陆成功
                         RxToast.success(info);
                         Log.d(TAG, "onSuccess: " + response.getToken());
-                        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                         startActivity(intent);
 
                     }
@@ -241,9 +247,10 @@ public class LoginActivity extends AppCompatActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN) == WindowManager.LayoutParams.FLAG_FULLSCREEN;
     }
 
-    @OnClick({R.id.iv_clean_phone, R.id.clean_password, R.id.iv_show_pwd,R.id.regist})
+    @OnClick({R.id.iv_clean_phone, R.id.clean_password, R.id.iv_show_pwd, R.id.regist,
+            R.id.btn_reg})
     public void onViewClicked(View view) {
-        Log.d(TAG, "onViewClicked: " +view.getId());
+        Log.d(TAG, "onViewClicked: " + view.getId());
         switch (view.getId()) {
             case R.id.iv_clean_phone:
                 mEtMobile.setText("");
@@ -267,7 +274,12 @@ public class LoginActivity extends AppCompatActivity {
 
             case R.id.regist:
                 //注册跳转
-                Intent intent = new Intent(LoginActivity.this,RegisterActivity.class);
+                Intent intent1 = new Intent(LoginActivity.this, RegisterActivity.class);
+                startActivity(intent1);
+                break;
+            case R.id.btn_reg:
+                //注册跳转
+                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
                 startActivity(intent);
                 break;
         }

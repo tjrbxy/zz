@@ -3,4 +3,5 @@
     <string name="check">一键检测</string>
     <string name="login">登陆</string>
     <string name="register">注册</string>
+    <string name="backLogin">返回登录页面</string>
 </resources>
