@@ -274,12 +274,12 @@ public class LoginActivity extends AppCompatActivity {
 
             case R.id.regist:
                 //注册跳转
-                Intent intent1 = new Intent(LoginActivity.this, RegisterActivity.class);
+                Intent intent1 = new Intent(LoginActivity.this, ShareActivity.class);
                 startActivity(intent1);
                 break;
             case R.id.btn_reg:
-                //注册跳转
-                Intent intent = new Intent(LoginActivity.this, ShareActivity.class);
+                //分享的二维码
+                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
                 startActivity(intent);
                 break;
         }
