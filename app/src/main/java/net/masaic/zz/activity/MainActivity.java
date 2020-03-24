@@ -1,11 +1,17 @@
 package net.masaic.zz.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -19,6 +25,9 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.tbruyelle.rxpermissions2.Permission;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -43,12 +52,15 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.reactivex.functions.Consumer;
 
 public class MainActivity extends AppCompatActivity implements AdapterView.OnItemClickListener {
 
     private static final String TAG = "MainActivity-app";
-    private RecyclerView mRecyclerView;
+    // private RecyclerView mRecyclerView;
     private BaseRecyclerViewAdapter mBaseAdapter;
     private MacLogsBiz mMacLogsBiz = new MacLogsBiz();
     private List<MacLogs> mMacListLogs = new ArrayList<>();
@@ -64,16 +76,31 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     // 权限
     final RxPermissions rxPermissions = new RxPermissions(this);
     private WebSettings settings;
+    // 绑定 View ID
+    @BindView(R.id.tv_wife_name)
+    TextView mWifeName;
+    @BindView(R.id.web_view)
+    WebView mWebView;
+    @BindView(R.id.recycler_view)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.btn_check)
+    Button mBtnCheck;
 
 
     @Override
+
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // 自动绑定 View ID
+        ButterKnife.bind(this);
         // WebView
         initWebView();
+        // 获取WiFi名称
+        mWifeName.setText(this.getWifiName(this));
         // WIFI
         mProbe = new WifiProbeManager();
+        Log.d(TAG, "onCreate: " + mProbe);
         // 检测Mac
         initScan();
         // 权限
@@ -102,9 +129,60 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         initRecyclerView();
     }
 
+    /**
+     * 获取SSID
+     *
+     * @param activity 上下文
+     * @return WIFI 的SSID
+     */
+    public String getWifiName(Activity activity) {
+        String ssid = "unknown id";
+
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O || Build.VERSION.SDK_INT == Build.VERSION_CODES.P) {
+
+            WifiManager mWifiManager = (WifiManager) activity.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+
+            assert mWifiManager != null;
+            WifiInfo info = mWifiManager.getConnectionInfo();
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                return info.getSSID();
+            } else {
+                return info.getSSID().replace("\"", "");
+            }
+        } else if (Build.VERSION.SDK_INT == Build.VERSION_CODES.O_MR1) {
+
+            ConnectivityManager connManager = (ConnectivityManager) activity.getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+            assert connManager != null;
+            NetworkInfo networkInfo = connManager.getActiveNetworkInfo();
+            if (networkInfo.isConnected()) {
+                if (networkInfo.getExtraInfo() != null) {
+                    return networkInfo.getExtraInfo().replace("\"", "");
+                }
+            }
+        }
+        return ssid;
+    }
+
+    /**
+     * 获取 wifi 名称
+     *
+     * @param context
+     * @return
+     */
+    private String getWifiName1(Context context) {
+        WifiManager wifiMgr = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
+        int wifiState = wifiMgr.getWifiState();
+        WifiInfo info = wifiMgr.getConnectionInfo();
+        String wifiId = info != null ? info.getSSID().replace("\"", "") : null;
+        Log.d(TAG, "getWifiName: " + wifiId);
+        mWifeName.setText(wifiId);
+        return wifiId;
+    }
+
+
     private void initRecyclerView() {
         // 列表
-        mRecyclerView = findViewById(R.id.recycler_view);
         //  RecyclerView 下面两行如果没有 数据不显示
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         mRecyclerView.setLayoutManager(linearLayoutManager);
@@ -126,16 +204,15 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
      * WebView
      */
     private void initWebView() {
-        WebView webView = findViewById(R.id.web_view);//绑定ID
-        webView.setWebViewClient(new WebViewClient());//添加WebViewClient实例
-        settings = webView.getSettings();
+        mWebView.setWebViewClient(new WebViewClient());//添加WebViewClient实例
+        settings = mWebView.getSettings();
         /**关闭webview中缓存**/
         settings.setJavaScriptEnabled(true); // 支持js
         settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
         settings.setTextZoom(100);
         settings.setUseWideViewPort(true);
         settings.setLoadWithOverviewMode(true);
-        webView.loadUrl("https://zz.masaic.net/web.html");//添加浏览器地址
+        mWebView.loadUrl("https://zz.masaic.net/web.html");//添加浏览器地址
     }
     //</editor-fold>
 
@@ -321,9 +398,11 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     //</editor-fold>
 
     //<editor-fold desc="Event">
-    public void onClick(View view) {
+    @OnClick({R.id.btn_check})
+    public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.check:
+            case R.id.btn_check:
+                mWifeName.setText(this.getWifiName(this));
                 if (mMacList.size() == 0) {
                     T.showToast("30秒后重试！");
                     return;
@@ -333,6 +412,20 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
         }
     }
+
+/*    public void onClick(View view) {
+        switch (view.getId()) {
+            case R.id.check:
+                this.getWifiName(this);
+                if (mMacList.size() == 0) {
+                    T.showToast("30秒后重试！");
+                    return;
+                }
+                initSendMac();
+                break;
+
+        }
+    }*/
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
