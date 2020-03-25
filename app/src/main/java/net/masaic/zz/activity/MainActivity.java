@@ -26,7 +26,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.tbruyelle.rxpermissions2.Permission;
@@ -40,6 +39,7 @@ import net.masaic.zz.adapter.MyViewHolder;
 import net.masaic.zz.bean.MacLogs;
 import net.masaic.zz.biz.MacLogsBiz;
 import net.masaic.zz.net.CommonCallback;
+import net.masaic.zz.utils.SPUtils;
 import net.masaic.zz.utils.T;
 import net.masaic.zz.wifi_probe.WifiProbeManager;
 
@@ -255,7 +255,8 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
             parmas.put("lat", lat + "");
             parmas.put("lng", lng + "");
             parmas.put("mac", jsonArray.toString());
-            Log.d(TAG, "initSendMac: " + jsonArray.toString());
+            parmas.put("mobile", SPUtils.getInstance().get("mobile", ""));
+
             mMacLogsBiz.insertMac(parmas, new CommonCallback<List<MacLogs>>() {
                 @Override
                 public void onError(Exception e) {
