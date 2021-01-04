@@ -52,5 +52,10 @@ dependencies {
     // RxTools
     implementation 'com.github.vondear:RxTools:v2.3.9'//请替换成上方 JitPack 最新的版本号
     //
+    compileOnly 'org.projectlombok:lombok:1.18.16'
+    annotationProcessor 'org.projectlombok:lombok:1.18.16'
+
+    testCompileOnly 'org.projectlombok:lombok:1.18.16'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.16'
 
 }
