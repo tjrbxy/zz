@@ -3,3 +3,6 @@
 - 下面是获取到的mac集合
 
 ![](https://github.com/buttonXin/WifiProbe/blob/master/maclist.jpg)
+
+
+# jdk 版本需要11
